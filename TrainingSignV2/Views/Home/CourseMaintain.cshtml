@@ -1,0 +1,255 @@
+﻿@model TrainingSignWeb.Models.TCourseMaintainModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadScripts{
+    @Scripts.Render("~/Scripts/ajaxupload.js")
+}
+
+<div>
+    <header class="panel-heading">
+        <h3>课程维护 Course Maintain</h3>
+    </header>
+
+    <div style="overflow: auto">
+        @using(Html.BeginForm("CourseMaintain", "Home",
+                FormMethod.Post, new { @id = "form_CourseMaintain" }))
+        {
+        <div class="col-lg-10">
+            <div class="form-group">
+                @Html.LabelFor(m => m.CourseNO)
+                @Html.TextBoxFor(m => m.CourseNO, null, new Dictionary<string, object>
+                                {
+                                    {"class", "form-control col-lg-6"},
+                                    {"required", "true"}
+                                })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.CourseContext)
+                @Html.TextBoxFor(m => m.CourseContext, null, new Dictionary<string, object>
+                                {
+                                    {"class", "form-control col-lg-6"},
+                                    {"required", "true"}
+                                })
+            </div>
+            <div class="col-lg-5 form-group">
+                @Html.LabelFor(m => m.CourseTime)
+                @Html.TextBoxFor(m => m.CourseTime, null, new Dictionary<string, object>
+                                {
+                                    {"class", "form-control col-lg-6"},
+                                    {"required", "true"}
+                                })
+            </div>
+        </div>
+        <div class="col-lg-10 form-group">
+            <div class="col-lg-5">
+                <input type="submit" class="btn btn-primary" value="Add" ID="btnAdd" />
+                <input type="button" class="btn btn-primary" value="Update" ID="btnUpdate" />
+            </div>
+            <div class="col-lg-4">
+                <input type="button" class="btn btn-primary" value="Import" ID="btnImport" />
+            </div>
+        </div>
+        }
+
+        <div style="height:840px">
+            <table id="tblCourse" class="table table-striped table-bordered table-hover dataTable">
+                <thead>
+                    <tr></tr>
+                </thead>
+            </table>
+
+            @*<asp:GridView ID="gvCourse" runat="server" Width="64%"
+                              AutoGenerateColumns="False"
+                              OnSelectedIndexChanged="gvCourse_SelectedIndexChanged"
+                              OnRowCancelingEdit="gvCourse_RowCancelingEdit"
+                              OnRowEditing="gvCourse_RowEditing"
+                              OnPageIndexChanging="gvCourse_PageIndexChanging"
+                              AllowPaging="True"
+                              OnRowCommand="gvCourse_RowCommand">
+                    <Columns>
+                        <asp:BoundField DataField="course_no" HeaderText="Course No" SortExpression="course_no" />
+                        <asp:BoundField DataField="course_context" HeaderText="Course Context" SortExpression="course_context" />
+                        <asp:BoundField DataField="course_time" HeaderText="Course Time" DataFormatString="{0:F}" SortExpression="course_time" />
+
+                        <asp:CommandField HeaderText="Select" ShowSelectButton="True" ButtonType="Button" />
+                        <asp:TemplateField HeaderText="Remove Invoke">
+                            <ItemTemplate>
+                                <asp:Button ID="btnDelCourse" runat="server" CommandArgument='<%# Eval("id") %>'
+                                            CommandName="DeleteCourse" Text="删除课程" />
+                                <asp:Button ID="btnModifyGrant" runat="server" CommandArgument='<%# Eval("id") %>'
+                                            CommandName="ModifyGrant" Text="修改课程授权" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                    </Columns>
+
+                    <EmptyDataRowStyle BackColor="Red" />
+                    <HeaderStyle BackColor="#0000CC" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle HorizontalAlign="Center" CssClass="GridPager" />
+                </asp:GridView>*@
+        </div>
+    </div>
+
+</div>
+
+@*<div class="modal fade" id="dlgModifyGrant" tabindex="-1" role="dialog" aria-labelledby="dlgModifyGrant" aria-hidden="true">
+    <div class="modal-dialog" style="width: 320px;">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px">
+                <label style="font-size: 12px; font-weight: 600; margin: 0;">讲师授权修改</label>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="height: 200px; overflow-y: auto">
+                    <asp:CheckBoxList ID="chkboxListLectors" runat="server" CssClass="chkboxList">
+                    </asp:CheckBoxList>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px">
+                <asp:Button ID="btnGrant" class="btn btn-info btn-xs" runat="server"
+                            Text="修改授权 Grant"
+                            OnClick="btnGrant_OnClick" />
+                <button type="button" class="btn btn-default btn-xs" data-dismiss="modal">关闭 Close</button>
+            </div>
+        </div>
+        <asp:HiddenField ID="hidSelCourse" runat="server" />
+    </div>
+</div>*@
+
+
+@section Scripts{
+    <script type="text/javascript">
+        var courseHandler = null;
+
+        $(function() {
+            InitUploadCourse();
+            InitCourseMaintainForm();
+            InitCourseTab();
+        });
+
+        function InitCourseMaintainForm() {
+            $("#form_CourseMaintain").validate();
+        }
+        function InitUploadCourse() {
+            var oBtn = document.getElementById("#btnImport");
+            new AjaxUpload(oBtn, {
+                action: "@Url.Action("ImportCourse", "ComUtil")",
+                name: "upload",
+                onSubmit: function (file, ext) {
+                    if (ext && /^(xlsx)$/.test(ext)) {
+                        //ext是后缀名
+                        oBtn.disabled = "disabled";
+                    } else {
+                        BootstrapDialog.alert("只支持xlsx格式的excel文档！");
+                        return false;
+                    }
+                },
+                onComplete: function (file, response) {
+                    var data = eval("(" + response + ")");
+                    if (data.Message) {
+                        ShowSuccessDialog(data.Message, window.location.href);
+                    } else {
+                        window.location.replace(window.location.href);
+                    }
+                }
+            });
+        }
+        function InitCourseTab() {
+            if (!courseHandler) {
+                courseHandler = new CourseHandler();
+            }
+            courseHandler.Reload();
+        }
+
+        function ModifyGrant() {
+            $('#dlgModifyGrant').modal('show');
+            return false;
+        }
+        function HideModifyGrant() {
+            $('#dlgModifyGrant').modal('hide');
+        }
+        function PromptDelCourse(sCour) {
+            var sPrompt = sCour ? "确定要删除[" + sCour + "]课程吗？"
+                                : "确定要删除该课程吗？";
+            BootstrapDialog.confirm(sPrompt, function (result) {
+                if (result) {
+                    DoDelCourse();
+                }
+            });
+        }
+        function DoDelCourse() {
+            var cid = $('#<%=hidSelCourse.ClientID%>').val();
+            AjaxSend("/common/CommonFunc.ashx?action=DelCourse&cid=" + cid, null, function (result) {
+                var data = result;
+                if (data && data.ret) {
+                    window.location.replace(window.location.href);
+                } else {
+                    BootstrapDialog.alert("删除课程失败" + (data.serr ? ":\n" + data.serr : ""));
+                }
+            });
+        }
+
+        var CourseHandler = function () {
+            var self = this;
+            self.oTabLector = null;
+            var idTab = "#tblCourse";
+            var tabCols = [
+                { title: "课程号", data: "course_no", width: "50px" },
+                { title: "课程主题", data: "course_context", width: "50px" },
+                { title: "课程时长", data: "course_time", width: "50px" },
+                {
+                    title: "",
+                    render: function (data, type, full, meta) {
+                        var tButton = '<Button onclick="courseHandler.RemoveCourse(this)" class="btn btn-warning btn-xs">删除课程</button>';
+                        return tButton;
+                    }
+                },
+                {
+                    title: "",
+                    render: function (data, type, full, meta) {
+                        var tButton = '<Button onclick="ModifyGrant()" class="btn btn-info btn-xs">修改课程授权</button>';
+                        return tButton;
+                    }
+                }
+            ];
+            var colDefs = [];
+            var sDom = 'frtip';
+
+            self.Reload = function(training_id) {
+                var url = "@Url.Action("GetAllCourse", "ComUtil")"; //!TODO
+                var mon = GetSummMon();
+                var showEmpty = $("#chkShowEmpty").is(":checked");
+                var para = { "mon": mon, "showEmpty": showEmpty };
+                AjaxPost(url,
+                        JSON.stringify(para),
+                        true,
+                        function (result) {
+                            if (!result || !result.bok) {
+                                return;
+                            }
+                            self.ResetData(result.data);
+                        });
+            }
+            self.ResetData = function (dataSet) {
+                var $tabLec = $(idTab).DataTable({
+                    destroy: true,
+                    paging: true,
+                    processing: true,
+                    searching: true,
+                    autoWidth: true,
+                    select: true,
+                    columns: tabCols,
+                    columnDefs: colDefs,
+                    dom: sDom,
+                    data: (!dataSet ? [] : dataSet),
+                    ordering: true,
+                    order: [[ 7, "desc" ]]
+                });
+                self.oTabLector = new TTabHelper($tabLec);
+            }
+        }
+
+    </script>
+}

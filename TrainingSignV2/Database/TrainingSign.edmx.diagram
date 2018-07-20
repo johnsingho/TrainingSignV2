@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="286da551ad334183ab174d00083e20f7" Name="Diagram1">
+        <EntityTypeShape EntityType="TrainingSignModel.sys_user" Width="1.5" PointX="5.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="TrainingSignModel.tbl_course" Width="1.5" PointX="0.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="TrainingSignModel.tbl_delete_trainee_log" Width="1.5" PointX="2.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="TrainingSignModel.tbl_lector" Width="1.5" PointX="0.75" PointY="2" IsExpanded="true" />
+        <EntityTypeShape EntityType="TrainingSignModel.tbl_lector_course_link" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="TrainingSignModel.tbl_trainee" Width="1.5" PointX="8" PointY="1.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="TrainingSignModel.tbl_training" Width="1.5" PointX="5.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="TrainingSignModel.tbl_training_lector_link" Width="1.5" PointX="3" PointY="3.625" IsExpanded="true" />
+        <AssociationConnector Association="TrainingSignModel.FK_TBL_LECT_REFERENCE_TBL_LECT" ManuallyRouted="false" />
+        <AssociationConnector Association="TrainingSignModel.FK_TBL_TRA_LECT_REFERENCE_TBL_LECT" ManuallyRouted="false" />
+        <AssociationConnector Association="TrainingSignModel.FK_TBL_TRAI_REFERENCE_TBL_TRAI" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,107 @@
+﻿@using DAL
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>TrainingSign - @ViewBag.Title</title>
+    @Styles.Render("~/Content/bs")
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/my")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bs")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/my")
+    @Scripts.Render("~/bundles/main")
+    @RenderSection("headScripts", required: false)
+    @RenderSection("styles", required: false)
+
+    <style>
+        .container{
+            width:95%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="navbar-header" style="margin-left: -28px;">
+            <div class="navbar-header headerbg">
+                <div class="navbar-brand" style="margin-left: 70px; font-size: 30px; color: #19adcc; word-spacing: -2px;">
+                    @CommonInfo.SiteTitle
+                </div>
+            </div>
+        </div>
+
+        <div class="collapse navbar-collapse horizontal-menu-page">
+            <ul class="nav navbar-nav">
+                <li><a href="@Url.Action("BeginTraining","Home")">开始培训<br />Begin Training</a></li>
+                <li><a href="@Url.Action("LiveSigning","Home")">现场签到<br />Signing</a></li>
+                <li><a href="@Url.Action("EndTraining","Home")">结束培训<br />End Training</a></li>
+                <li><a href="@Url.Action("TrainingLog","Home")">统计记录<br />Training Log</a></li>
+                @if (DAL.CommonInfo.IsLogin())
+                {
+                    <li><a href="@Url.Action("CourseMaintain","Home")">课程维护<br />Course Maintain</a></li>
+                    <li><a href="@Url.Action("LectorMaintain","Home")">讲师维护<br />Lector Maintain</a></li>
+                }
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                @if (DAL.CommonInfo.IsLogin())
+                {
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-user fa-fw"></i>                            
+                            @{
+                                var user = CommonInfo.CurrentUser;
+                                if (null != user)
+                                {
+                                    <label id="lblLogin">@user.NickName</label>
+                                }
+                            }
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@Url.Action("UserMng","Login")"><i class="fa fa-asterisk fa-fw"></i>Login User Manage</a></li>
+                            <li><a href="@Url.Action("Signout","Login")"><i class="fa fa-sign-out fa-fw"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <a href="@Url.Action("Signin","Login", new {ReturnUrl=ViewBag.CurUrl})"><i class="fa fa-sign-in fa-fw"></i>Login</a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+
+    <div class="container body-content">
+        @RenderBody()
+    </div>
+    <footer class="sticky-footer">
+        &copy; @DateTime.Now.Year - Flex
+    </footer>
+
+    <div class="busyLoading" style="display: none">
+        <div class="center">
+            <img alt="正在操作，请稍候..." src="@Url.Content("~/Images/loader.gif")" />
+        </div>
+        <script>
+            function showBusyLoading(bShow) {
+                bShow ? $(".busyLoading").show() : $(".busyLoading").hide();
+            }
+        </script>
+    </div>
+
+    
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

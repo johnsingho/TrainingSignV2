@@ -1,0 +1,326 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top: -30px;">
+    <header class="panel-heading">
+        <h3>创建培训 Create Training</h3>
+    </header>
+
+    <div class="row">
+        @using (Html.BeginForm("BeginTraining", "Home",
+        FormMethod.Post, new { @id = "form_BeginTraining" }))
+        {
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>本次课程:</label>
+                    <select id="ddlCourse" class="form-control"
+                            title="请选择一个课程...">
+                        <option></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    @Html.Label("组织者:")
+                    @Html.TextBox("txtOrganizer", null, new Dictionary<string, object>
+                                        {
+                                            {"class", "form-control"}
+                                        })
+                </div>
+                <div class="form-group">
+                    @Html.Label("培训地点:")
+                    @Html.TextBox("txtVenue", null, new Dictionary<string, object>
+                                        {
+                                            {"class", "form-control"},
+                                            {"required", "true"}
+                                        })
+                </div>
+                <div class="form-group">
+                    <div class="form-group">
+                        <label class="col-md-10">培训时间（标准时长： <span id="lblCurCourseLen"></span>小时）</label>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>From:</label>
+                        <input class="form-control required MyValidDate" id="txtFromDate" name="txtFromDate"
+                               value="" type="text" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>To:</label>
+                        <input class="form-control required MyValidDate" id="txtToDate" name="txtToDate"
+                               value="" type="text" />
+                    </div>
+                    @Html.Hidden("hidCurCourse")
+                    @Html.Hidden("hidLectors")
+                </div>
+                <div class="row">
+                    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    <div class="col-md-7 form-group">
+                        <input id="btnConfirm" type="button" class="btn btn-primary" disabled
+                               onclick="BeforeSubmitCheck()"
+                               value="确定创建" />
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="col-md-6">
+            <div class="form-group">
+                <div class="form-group">
+                    @Html.Label("本次讲师:")
+                </div>
+                <div class="form-group">
+                    <div class="col-md-7">
+                        @Html.TextBox("txtCurLector", null,
+                                          new Dictionary<string, object> { { "class", "form-control" }, { "disabled", "true" } })
+                    </div>
+                    <input type="button" class="btn btn-info" id="btnAddRow" disabled
+                           value="添加讲师" onclick="ManualAddRow('#txtCurLector')" />
+                </div>
+                <div class="form-group" @*style="height: 150px; overflow-y: auto"*@>
+                    <div id="gridcontainer">
+                        <table id="tblDetail" class="table table-striped table-bordered table-hover dataTable">
+                            <thead>
+                                <tr>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+        var gidFromDate = '#txtFromDate';
+        var gidToDate = '#txtToDate';
+        var oTabLector = null;
+        var oCourSelector = null;
+
+        function BindTextBox(idtxtBox) {
+            var eleText = $(idtxtBox);
+            eleText.attr('MaxLength', 10);
+
+            eleText.bind('keypress',
+                function(event) {
+                    var keycode = (event.keyCode ? event.keyCode : event.which);
+                    if ((13 === keycode) /*|| (cur && cur>= LIM-1)*/) {
+                        event.preventDefault();
+                        ManualAddRow(idtxtBox);
+                    }
+                });
+        }
+
+        function GetCurCourse() {
+            /*
+            id: "46bb366d-cfa2-4240-b015-fdedf42909bf"
+            selected: true
+            text: "DM0062 - 贴片机(实操）"
+            timeLen: 8
+            */
+            return oCourSelector.GetCurSelData();
+        }
+
+        $(function() {
+            BindTextBox('#txtCurLector');
+            InitCourseList("#ddlCourse");
+            InitDateCtrl();
+            InitCreateForm();
+        });
+
+        function InitCourseList(idCtl) {
+            var url = "@Url.Action("GetAllCourse", "ComUtil")";
+            AjaxPost(url,
+                "{}",
+                true,
+                function(result) {
+                    $(idCtl).select2({
+                            data: result,
+                            placeholder: "请选择一个课程...",
+                            dropdownAutoWidth: true
+                        }
+                    );
+                    oCourSelector = new TSelect2Helper($(idCtl));
+                    oCourSelector.SetSelectChangeCallback(function (data) {
+                        EnableInputLector(data && data.id);
+                        $("#hidCurCourse").val(data.id);
+                        RefreshCourseLen(data.timeLen);
+                    });
+                });
+        }
+
+        function RefreshCourseLen(tim) {
+            $("#lblCurCourseLen").text("" + tim);
+        }
+
+        function EnableInputLector(b) {
+            $("#txtCurLector").prop('disabled', !b);
+            $("#btnAddRow").prop("disabled", !b);
+            $("#btnConfirm").prop("disabled", !b);
+        }
+
+        function InitDateCtrl() {
+            $(gidFromDate).datetimepicker({
+                mask: true, // '9999/19/39 29:59'
+                minDate: 0,
+                step: 10,
+                defaultDate: new Date(),
+                todayButton: true,
+                onChangeDateTime: SetToDate
+            });
+            $(gidToDate).datetimepicker({
+                mask: true, // '9999/19/39 29:59'
+                minDate: 0,
+                step: 10,
+                todayButton: true
+            });
+        }
+
+        function SetToDate(currentDateTime) {
+            var curCour = GetCurCourse();
+            if (!curCour) {
+                return;
+            }
+            var dtTo = moment(currentDateTime).add(curCour.timeLen, 'hours');
+            //console.log("dtTo=" + dtTo);
+            var sdtTo = dtTo.format("YYYY/MM/DD HH:mm");
+            $(gidToDate).val(sdtTo);
+        }
+
+        function InitCreateForm() {
+            $("#form_BeginTraining").validate();
+            jQuery.validator.addMethod("MyValidDate",
+                function(value, element) {
+                    var isDate = !isNaN(Date.parse(value));
+                    return this.optional(element) || isDate;
+                },
+                '时间无效!');
+            jQuery.validator.classRuleSettings.MyValidDate = { MyValidDate: true };
+        }
+
+        function BeforeSubmitCheck() {
+            var curCour = GetCurCourse();
+            if (!curCour) {
+                return;
+            }
+            var lectors = oTabLector.GetAllData();
+            if (!lectors || lectors.Length <= 0) {
+                BootstrapDialog.alert("请添加讲师！",
+                    function() {
+                        $("#txtCurLector").focus();
+                    });
+                return;
+            }
+            var nDiff = moment($(gidToDate).val()).diff($(gidFromDate).val(), 'minutes');
+            if (!nDiff || nDiff < 0) {
+                BootstrapDialog.alert("结束时间无效！",
+                    function() {
+                        $(gidToDate).focus();
+                    });
+                return;
+            }
+            else if (nDiff < curCour.timeLen * 60) {
+                BootstrapDialog.confirm("课程培训时间比标准时间短，是否确认？",
+                    function(result) {
+                        if (result) {
+                            $("#form_BeginTraining").submit();
+                        }
+                    });
+            } else {
+                $("#form_BeginTraining").submit();
+            }
+        }
+
+        //////////////////////////////////
+        // Add lectors
+        $(function() {
+            var tabCols = [
+                { title: "Work ID", data: "workid" },
+                { title: "讲师中文名", data: "cn_name" },
+				{ title: "讲师English Name", data: "en_name" },
+                {
+                    title: "",
+                    render: function (data, type, full, meta) {
+                        var tButton = '&nbsp;<Button onclick="RemoveRow(this)" class="btn btn-warning btn-sm">Remove</button>';
+                        return tButton;
+                    }
+                }
+            ];
+            var colDefs = [];
+            var idTabLector = "#tblDetail";
+            var $tabLec = $(idTabLector).DataTable({
+                destroy: true,
+                paging: false,
+                processing: false,
+                searching: false,
+                ordering: false,
+                autoWidth: false,
+                select: true,
+                columns: tabCols,
+                columnDefs: colDefs
+            });
+
+            oTabLector = new TTabHelper($tabLec);
+
+            //!TODO test data
+            //oTabLector.AddRow({ workid: '2566117', cn_name: 'john cn', en_name: 'johnen' });
+            //oTabLector.AddRow({ workid: '777', cn_name: 'sam cn cn', en_name: 'johnen' });
+            //oTabLector.AddRow({ workid: '33', cn_name: 'sam cn cn', en_name: '333' });
+            
+        });
+
+    function StoreLectors() {
+        var allData = JSON.stringify(oTabLector.GetAllData());
+        $("#hidLectors").val(allData);
+    }
+    function DoAddRow(lecInfo) {
+        var exist = oTabLector.Find(function(idx, data, node) {
+            return data.workid === lecInfo.workid;
+        });
+        if (exist.length > 0) {
+            return;
+        }
+        oTabLector.AddRow(lecInfo);
+        StoreLectors();
+    }
+    function RemoveRow(cell) {
+        oTabLector.RemoveRow(cell);
+        StoreLectors();
+    }
+
+    function ManualAddRow(idtxtBox) {
+        var eleText = $(idtxtBox);
+        var value = $.trim(eleText.val());
+        var curCour = GetCurCourse();
+        var courseid = !curCour ? "" : curCour.id;
+        var url = "@Url.Action("CheckLector", "ComUtil")";
+        AjaxPost(url,
+            "{'workid':'" + value + "','courseid':'" + courseid + "'}",
+            true,
+            function (result) {
+                var nType = result.data;
+                var lecInfo = result.extra;
+                if (nType >= 1) {
+                    eleText.val(lecInfo.workid);
+                    DoAddRow(lecInfo);
+                    return true;
+                } else if (nType == 0) {
+                    BootstrapDialog.alert(result.msg,
+                        function () {
+                            eleText.val('');
+                            eleText.focus();
+                        });
+                    return false;
+                } else {
+                    BootstrapDialog.alert('此员工不是讲师！',
+                        function () {
+                            eleText.val('');
+                            eleText.focus();
+                        });
+                    return false;
+                }
+            });
+    }
+
+    </script>
+}

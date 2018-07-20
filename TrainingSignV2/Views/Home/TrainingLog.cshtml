@@ -1,0 +1,560 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadScripts{
+    @Scripts.Render("~/bundles/My97DatePicker")
+}
+
+@section Styles{
+<style>
+    .panel-heading {
+        border-bottom: 1px dotted rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        color: #535351;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .myCheckbox input {
+        float: left;
+        margin-left: 20px;
+    }
+
+    .myCheckbox label {
+        display: inline;
+        font-weight: 400;
+        cursor: pointer;
+        background: none;
+        margin-top: -5px;
+    }
+
+    .dataTable > tbody > tr{
+        height: 45px;
+    }
+    .dataTable > tbody > tr td {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 160px;
+    }
+
+</style>
+}
+
+<div class="col-lg-11">
+    <header class="panel-heading">
+        <h3>培训记录 Training Logs</h3>
+    </header>
+
+    <section class="">
+        <div class="row">
+            <div class="col-lg-6">
+                <section class="panel">
+                    <header class="panel-heading">
+                        课程培训记录
+                    </header>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <select id="ddlCourse" class="form-control"
+                                    title="请选择一个课程...">
+                                <option></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-group col-lg-7" style="margin-left:-1em">
+                                <input id="txtMonTraining" autocomplete="off" style='border-radius: 0px'
+                                       class="form-control WdateBS" type="text"
+                                       onclick="WdatePicker({ dateFmt: 'yyyy-MM', maxDate: '%y-%M', onpicked: function(dp){ OnTrainingMon(dp); }});"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <select id="ddlTraining" class="form-control"
+                                    title="请选择一个培训...">
+                                <option></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <span class="text-info" style="padding-left: 15px;" id="spSignedAttend" hidden>
+                                出席人数:<span id="spSigned" style="font-weight:800;"></span>
+                            </span>
+                        </div>
+                        <div class="form-group">
+                            <input type="button" class="btn btn-primary" id="btnDownTrainingRec" disabled
+                                   value="培训出席记录" onclick="ShowTrainingRec(true);" />
+                            @if (DAL.CommonInfo.IsLogin())
+                            {
+                                <input type="button" class="btn btn-danger" id="btnFakeDelTrainingRec" disabled
+                                       value="删除培训记录" onclick="DelTrainingLog();" />
+                             }
+                        </div>
+                        <div class="form-group">
+                            <input type="button" class="btn btn-info" id="btnDownLogCourseMon"
+                                   value="下载此课程本月的记录" onclick="DownLogCourseMon()" />
+                            <input type="button" class="btn btn-info" id="btnDownLogMon"
+                                   value="下载所有课程本月的记录" onclick="DownLogMon()" />
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-lg-6">
+                <section class="panel">
+                    <header class="panel-heading">
+                        月统计信息
+                    </header>
+                    <div class="panel-body">
+                        <div class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <div class="col-lg-6">
+                                    <input class="form-control WdateBS" id="txtMonSumm" value="" type="text"
+                                            onclick="WdatePicker({dateFmt: 'yyyy-MM',maxDate: '%y-%M'});"/>
+                                </div>
+                            </div>
+                            <div class="form-group myCheckbox">
+                                @Html.CheckBox("chkShowEmpty")
+                                <label for="chkShowEmpty">显示未开课课程</label>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-lg-10">
+                                    <button type="button" class="btn btn-primary" onclick="ShowSummary(true)">统计</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+</div>
+
+@*m月份的开课汇总*@
+<div class="modal fade" id="dlgMonthSummary" tabindex="-1" role="dialog" aria-labelledby="dlgMonthSummary" aria-hidden="true">
+    <div class="modal-dialog" style="width: 640px;">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px">
+                <label style="font-size: 12px; font-weight: 600; margin: 0;"><span id="spSelMonth"></span>月开课统计</label>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="height: 300px; overflow-y: auto">
+                    <table id="tblCourseSummary" class="table table-striped table-bordered table-hover dataTable">
+                        <thead>
+                            <tr>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px">
+                <button type="button" class="btn btn-info btn-xs" id="btnDownSummary" data-dismiss="modal" onclick="DownSummary()">
+                    下载 Download
+                </button>
+                <button type="button" class="btn btn-default btn-xs" data-dismiss="modal">关闭 Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*x课程m月份的培训签到记录*@
+<div class="modal fade" id="dlgTrainingLog" tabindex="-1" role="dialog" aria-labelledby="dlgTrainingLog" aria-hidden="true">
+    <div class="modal-dialog" style="width: 880px;">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px">
+                <label style="font-size: 12px; font-weight: 600; margin: 0;"><span id="spSelCourse"></span>课程培训记录</label>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="height: 400px; overflow-y: auto">
+                    <table id="tblTrainingLog" class="table table-striped table-bordered table-hover dataTable">
+                        <thead>
+                            <tr>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px">
+                @*<button type="button" class="btn btn-danger btn-xs" style="float:left" onclick="ConfirmDel()">删除所选记录</button>*@
+                <button type="button" class="btn btn-info btn-xs" id="btnDownTrainingLog" onclick="DownTrainingLog();">下载 Download</button>                
+                <button type="button" class="btn btn-default btn-xs" data-dismiss="modal">关闭 Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+<script type="text/javascript">
+    var oCourSelector = null;
+    var oTrainingSelector = null;
+    var trainingLogHandler=null;
+    var courseSummaryHandler = null;
+
+    $(function () {
+        InitDateCtrl();
+        InitCourseList("#ddlCourse");
+    });
+
+    function DoDownload() {
+        $('#dlgMonthSummary').modal('hide');
+        return false;
+    }
+    function ShowTrainingRec(bshow) {
+        if (bshow) {
+            InitTrainingLogDlg(GetCurTraining());
+        }
+        $('#dlgTrainingLog').modal(bshow?'show':'hide');
+    }
+    function ShowSummary(bshow) {
+        if (bshow) {
+            InitMonthSummaryDlg();
+        }
+        $('#dlgMonthSummary').modal(bshow ? 'show' : 'hide');
+    }
+
+
+    function PromptDelOk() {
+        BootstrapDialog.success("删除培训记录成功！");
+        window.location.href = window.location.href.replace('#', '');
+        return false;
+    }
+    function ConfirmDel() {
+        BootstrapDialog.confirm("确定要删除所选的人员记录吗？", function (result) {
+            if (result) {
+                $('#<%=btnDeleteLog.ClientID%>').click();
+            }
+        });
+    }
+    function SetTraineeCnt(cnt) {
+        if (isNumeric(cnt)) {
+            $("#spSignedAttend").removeAttr("hidden");
+            $("#spSigned").text(cnt);
+        } else {
+            $("#spSignedAttend").attr("hidden",true);
+        }
+    }
+
+    function EnableDownTrainingRec(bEnable) {
+        if(bEnable){
+            $("#btnDownTrainingRec").removeAttr("disabled");
+        }else{
+            $("#btnDownTrainingRec").attr("disabled", true);
+        }
+    }
+    function GetTrainingMon(){
+        return $("#txtMonTraining").val();
+    }
+    function GetSummMon(){
+        return $("#txtMonSumm").val();
+    }
+    function OnTrainingMon(dp) {
+        var newDt = dp.cal.getNewDateStr();
+        var cour = oCourSelector.GetCurSelData();
+        if (cour) {
+            InitTrainingList(cour.id, newDt);
+        }
+    }
+
+    function InitCourseList(idCtl) {
+        var url = "@Url.Action("GetAllCourse", "ComUtil")";
+        AjaxPost(url,
+            "{}",
+            true,
+            function(result) {
+                $(idCtl).select2({
+                    data: result,
+                    placeholder: "请选择一个课程...",
+                    dropdownAutoWidth: true
+                }
+                );
+                oCourSelector = new TSelect2Helper($(idCtl));
+                oCourSelector.SetSelectChangeCallback(function(cour) {
+                    if (!cour) { return; }
+                    var sMon = GetTrainingMon();
+                    InitTrainingList(cour.id, sMon);
+                });
+            });
+    }
+    function GetCurCourse() {
+        /*
+        id: "46bb366d-cfa2-4240-b015-fdedf42909bf"
+        selected: true
+        text: "DM0062 - 贴片机(实操）"
+        timeLen: 8
+        */
+        return oCourSelector.GetCurSelData();
+    }
+    function GetCurTraining() {
+        return oTrainingSelector.GetCurSelData();
+    }
+
+    function InitDateCtrl() {
+        var sym = moment().format("YYYY-MM");
+        $(".WdateBS").val(sym);
+    }
+
+    function InitTrainingList(cid, sMon) {
+        if (!cid) { return; }
+        if (!sMon || sMon.length < 6) { return; }
+
+        var url = "@Url.Action("GetMonTrainings", "ComUtil")";
+        var para = {"courId":cid,"mon":sMon};
+        AjaxPost(url,
+            JSON.stringify(para),
+            true,
+            function (result) {
+                if (oTrainingSelector) {
+                    oTrainingSelector.Reset();
+                } else {
+                    oTrainingSelector = new TSelect2Helper($("#ddlTraining"));
+                }
+
+                $("#ddlTraining").select2({
+                    data: result,
+                    placeholder: "请选择一个培训...",
+                    dropdownAutoWidth: true
+                });
+                oTrainingSelector.ClearSelect();
+                SetTraineeCnt();
+                oTrainingSelector.SetSelectChangeCallback(function (tra) {
+                    RefreshByTraining(tra);
+                });
+            });
+    }
+
+    function RefreshByTraining(tra) {
+        if (!tra) { return; }
+        var url = "@Url.Action("CalcTrainingInfo", "ComUtil")";
+        var para = {"training_id":tra.id, "need_timelen":false};
+        AjaxPost(url,
+            JSON.stringify(para),
+            false,
+            function(result) {
+                if(!result || !result.bok){
+                    return;
+                }
+                var traInf = result.data;
+                var cnt = traInf.nTrainee || 0;
+                SetTraineeCnt(cnt);
+                EnableDownTrainingRec(cnt > 0);
+            },
+            undefined,
+            function () {
+                showBusyLoading(true);
+            },
+            function () {
+                showBusyLoading(false);
+            });
+    }
+
+    function DelTrainingLog() {
+        var tra = GetCurTraining();
+        if (!tra || !tra.id) { return; }
+
+        BootstrapDialog.confirm("确定要删除该培训记录吗？", function (result) {
+            if (!result) { return; }
+            var url = "@Url.Action("DelTrainingLog", "ComUtil")";
+            var para = {"training_id":tra.id};
+            AjaxPost(url,
+                JSON.stringify(para),
+                false,
+                function(result) {
+                    if (!result || !result.bok) {
+                        var msg = "删除培训记录失败！ " + result.msg;
+                        BootstrapDialog.alert(msg);
+                    }
+                },
+                undefined,
+                function () {
+                    showBusyLoading(true);
+                },
+                function () {
+                    showBusyLoading(false);
+                });
+        });
+    }
+
+    function InitTrainingLogDlg(tra) {
+        if (!tra) { return; }
+        if (!trainingLogHandler) {
+            trainingLogHandler = new TrainingLogHandler();
+        }
+        trainingLogHandler.Reload(tra.id);
+    }
+    function InitMonthSummaryDlg() {
+        if (!courseSummaryHandler) {
+            courseSummaryHandler = new CourseSummaryHandler();
+        }
+        courseSummaryHandler.Reload();
+    }
+
+    var TrainingLogHandler = function () {
+        var self = this;
+        self.oTabLector = null;
+        var idTab = "#tblTrainingLog";
+        var tabCols = [
+                { title: "工号", data: "workid", width:"50px"},
+                { title: "姓名", data: "cn_name", width: "50px" },
+                { title: "部门", data: "dept_name", width: "50px" },
+                { title: "organizer", data: "organ_name" },
+                { title: "课程号", data: "course_no" },
+                { title: "课程内容", data: "course_context"},
+                { title: "培训时间", data: "training_time" },
+                { title: "签到时间", data: "signin_time"},
+                {
+                    title: "",
+                    render: function (data, type, full, meta) {
+                        var tButton = '<Button onclick="trainingLogHandler.RemoveTrainee(this)" class="btn btn-warning btn-xs">Remove</button>';
+                        return tButton;
+                    }
+                }
+        ];
+        var colDefs = [];
+        var sDom = 'frtip';
+
+        self.Reload = function(training_id) {
+            var url = "@Url.Action("LoadTrainingLog", "ComUtil")";
+            var para = { "training_id": training_id };
+            AjaxPost(url,
+                    JSON.stringify(para),
+                    true,
+                    function (result) {
+                        if (!result || !result.bok) {
+                            return;
+                        }
+                        self.ResetData(result.data);
+                    });
+        }
+        self.ResetData = function (dataSet) {
+            var $tabLec = $(idTab).DataTable({
+                destroy: true,
+                paging: true,
+                processing: true,
+                searching: true,
+                autoWidth: true,
+                select: true,
+                columns: tabCols,
+                columnDefs: colDefs,
+                dom: sDom,
+                data: (!dataSet ? [] : dataSet),
+                ordering: true,
+                order: [[ 7, "desc" ]]
+            });
+            self.oTabLector = new TTabHelper($tabLec);
+        }
+        self.RemoveTrainee = function (cell) {
+            var trainee = self.oTabLector.GetDataByCell(cell);
+            if (!trainee) {
+                return;
+            }
+            var sName = trainee.cn_name || trainee.en_name;
+            var sPrompt = "确定要移除学员[" + sName + "]？";
+            BootstrapDialog.confirm(sPrompt,
+                function (result) {
+                    if (!result) {
+                        return;
+                    }
+                    var url = "@Url.Action("DelTrainee", "ComUtil")";
+                    var para = { "sid": trainee.extra};
+                    AjaxPost(url,
+                            JSON.stringify(para),
+                            true,
+                            function (result) {
+                                if (!result || !result.bok) {
+                                    return;
+                                }
+                                self.oTabLector.RemoveRow(cell);
+                            });
+                });
+        }
+    };
+
+    var CourseSummaryHandler = function () {
+        var self = this;
+        self.oTabLector = null;
+        var idTab = "#tblCourseSummary";
+        var tabCols = [					
+            { title: "课程号", data: "workid", width: "50px" },
+            { title: "课程主题", data: "cn_name", width: "50px" },
+            { title: "课程时长", data: "dept_name", width: "50px" },
+            { title: "开课次数", data: "organ_name" },
+            { title: "受训总人数", data: "course_no" }
+        ];
+        var colDefs = [];
+        var sDom = 'frtip';
+
+        self.Reload = function(training_id) {
+            var url = "@Url.Action("LoadMonthSummary", "ComUtil")";
+            var mon = GetSummMon();
+            var showEmpty = $("#chkShowEmpty").is(":checked");
+            var para = { "mon": mon, "showEmpty": showEmpty };
+            AjaxPost(url,
+                    JSON.stringify(para),
+                    true,
+                    function (result) {
+                        if (!result || !result.bok) {
+                            return;
+                        }
+                        self.ResetData(result.data);
+                    });
+        }
+        self.ResetData = function (dataSet) {
+            var $tabLec = $(idTab).DataTable({
+                destroy: true,
+                paging: true,
+                processing: true,
+                searching: true,
+                autoWidth: true,
+                select: true,
+                columns: tabCols,
+                columnDefs: colDefs,
+                dom: sDom,
+                data: (!dataSet ? [] : dataSet),
+                ordering: true,
+                order: [[ 7, "desc" ]]
+            });
+            self.oTabLector = new TTabHelper($tabLec);
+        }
+    }
+
+    function DownTrainingLog() {
+        var tra = GetCurTraining();
+        var smon = GetTrainingMon();
+        var cour = GetCurCourse();
+        var url = "@Url.Action("DownTrainingLog", "ComUtil")";
+        var para = "?training_id=" + encodeURI(tra.id) + "&cour_name=" + encodeURI(cour.text) + "&mon=" + smon;
+        url += para;
+        parent.location.href = url;
+    }
+
+    //下载此课程本月的记录
+    function DownLogCourseMon()
+    {
+        var smon = GetTrainingMon();
+        var cour = GetCurCourse();
+        if (!cour || !cour.id || smon.length < 6) {
+            BootstrapDialog.alert("请先选择课程、培训月份");
+            return;
+        }
+        var url = "@Url.Action("DownLogCourseMon", "ComUtil")";
+        var para = "?course_id=" + encodeURI(cour.id) + "&cour_name=" + encodeURI(cour.text) + "&mon=" + smon;
+        url += para;
+        parent.location.href = url;
+    }
+
+    //下载所有课程本月的记录
+    function DownLogMon() {
+        var smon = GetTrainingMon();
+        if (smon.length < 6) {
+            BootstrapDialog.alert("请先选择培训月份");
+            return;
+        }
+        var url = "@Url.Action("DownLogMon", "ComUtil")";
+        var para = "?mon=" + smon;
+        url += para;
+        parent.location.href = url;
+    }
+
+
+</script>
+}
+

@@ -1,0 +1,446 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="TrainingSignModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="sys_user">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="ADAccount" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="FullName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="LastLogon" Type="datetime" />
+          <Property Name="IsValid" Type="bit" Nullable="false" />
+          <Property Name="IsAdmin" Type="bit" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_course">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="course_no" Type="varchar" MaxLength="40" />
+          <Property Name="course_context" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="course_time" Type="float" />
+        </EntityType>
+        <EntityType Name="tbl_delete_trainee_log">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ref_training_id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="workid" Type="varchar" MaxLength="10" />
+          <Property Name="name" Type="nvarchar" MaxLength="40" Nullable="false" />
+          <Property Name="signinTime" Type="datetime" />
+          <Property Name="deleteTime" Type="datetime" />
+        </EntityType>
+        <EntityType Name="tbl_lector">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="lector_workid" Type="varchar" MaxLength="10" />
+          <Property Name="lector_en_name" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="lector_cn_name" Type="nvarchar" MaxLength="40" Nullable="false" />
+          <Property Name="memo" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="tbl_lector_course_link">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="ref_lector_id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ref_course_id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_trainee">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="ref_training_id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="workid" Type="varchar" MaxLength="10" />
+          <Property Name="name" Type="nvarchar" MaxLength="40" Nullable="false" />
+          <Property Name="department" Type="nvarchar" MaxLength="80" />
+          <Property Name="organizer" Type="nvarchar" MaxLength="40" />
+          <Property Name="signinTime" Type="datetime" />
+          <Property Name="memo" Type="nvarchar" MaxLength="50" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_training">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ref_course_id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="trainer_organizer" Type="nvarchar" MaxLength="40" />
+          <Property Name="organizer" Type="nvarchar" MaxLength="40" />
+          <Property Name="venue" Type="nvarchar" MaxLength="40" />
+          <Property Name="plan_reach" Type="int" />
+          <Property Name="actual_reach" Type="int" />
+          <Property Name="total_training_time" Type="float" />
+          <Property Name="pass" Type="int" />
+          <Property Name="plan_start_time" Type="datetime" />
+          <Property Name="plan_end_time" Type="datetime" />
+          <Property Name="actual_end_time" Type="datetime" />
+          <Property Name="end_lector_workid" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="tbl_training_lector_link">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="ref_training_id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ref_lector_id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_TBL_LECT_REFERENCE_TBL_LECT">
+          <End Role="tbl_lector" Type="Self.tbl_lector" Multiplicity="1" />
+          <End Role="tbl_lector_course_link" Type="Self.tbl_lector_course_link" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_lector">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="tbl_lector_course_link">
+              <PropertyRef Name="ref_lector_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TBL_TRA_LECT_REFERENCE_TBL_LECT">
+          <End Role="tbl_lector" Type="Self.tbl_lector" Multiplicity="1" />
+          <End Role="tbl_training_lector_link" Type="Self.tbl_training_lector_link" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_lector">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="tbl_training_lector_link">
+              <PropertyRef Name="ref_lector_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TBL_TRAI_REFERENCE_TBL_TRAI">
+          <End Role="tbl_training" Type="Self.tbl_training" Multiplicity="1" />
+          <End Role="tbl_trainee" Type="Self.tbl_trainee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_training">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="tbl_trainee">
+              <PropertyRef Name="ref_training_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="Get_training_lectors_en" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" ReturnType="varchar">
+          <Parameter Name="training_id" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="Get_Training_Time_str" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" ReturnType="varchar">
+          <Parameter Name="dtStart" Type="datetime" Mode="In" />
+          <Parameter Name="dtEnd" Type="datetime" Mode="In" />
+        </Function>
+        <EntityContainer Name="TrainingSignModelStoreContainer">
+          <EntitySet Name="sys_user" EntityType="Self.sys_user" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_course" EntityType="Self.tbl_course" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_delete_trainee_log" EntityType="Self.tbl_delete_trainee_log" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_lector" EntityType="Self.tbl_lector" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_lector_course_link" EntityType="Self.tbl_lector_course_link" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_trainee" EntityType="Self.tbl_trainee" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_training" EntityType="Self.tbl_training" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_training_lector_link" EntityType="Self.tbl_training_lector_link" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_TBL_LECT_REFERENCE_TBL_LECT" Association="Self.FK_TBL_LECT_REFERENCE_TBL_LECT">
+            <End Role="tbl_lector" EntitySet="tbl_lector" />
+            <End Role="tbl_lector_course_link" EntitySet="tbl_lector_course_link" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TBL_TRA_LECT_REFERENCE_TBL_LECT" Association="Self.FK_TBL_TRA_LECT_REFERENCE_TBL_LECT">
+            <End Role="tbl_lector" EntitySet="tbl_lector" />
+            <End Role="tbl_training_lector_link" EntitySet="tbl_training_lector_link" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TBL_TRAI_REFERENCE_TBL_TRAI" Association="Self.FK_TBL_TRAI_REFERENCE_TBL_TRAI">
+            <End Role="tbl_training" EntitySet="tbl_training" />
+            <End Role="tbl_trainee" EntitySet="tbl_trainee" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="TrainingSignModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="sys_user">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="ADAccount" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FullName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="LastLogon" Type="DateTime" Precision="3" />
+          <Property Name="IsValid" Type="Boolean" Nullable="false" />
+          <Property Name="IsAdmin" Type="Boolean" Nullable="false" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+        </EntityType>
+        <EntityType Name="tbl_course">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="course_no" Type="String" MaxLength="40" FixedLength="false" Unicode="false" />
+          <Property Name="course_context" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="course_time" Type="Double" />
+        </EntityType>
+        <EntityType Name="tbl_delete_trainee_log">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ref_training_id" Type="Guid" Nullable="false" />
+          <Property Name="workid" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="name" Type="String" MaxLength="40" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="signinTime" Type="DateTime" Precision="3" />
+          <Property Name="deleteTime" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="tbl_lector">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="lector_workid" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="lector_en_name" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="lector_cn_name" Type="String" MaxLength="40" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="memo" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tbl_lector_course_link" Relationship="Self.FK_TBL_LECT_REFERENCE_TBL_LECT" FromRole="tbl_lector" ToRole="tbl_lector_course_link" />
+          <NavigationProperty Name="tbl_training_lector_link" Relationship="Self.FK_TBL_TRA_LECT_REFERENCE_TBL_LECT" FromRole="tbl_lector" ToRole="tbl_training_lector_link" />
+        </EntityType>
+        <EntityType Name="tbl_lector_course_link">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="ref_lector_id" Type="Guid" Nullable="false" />
+          <Property Name="ref_course_id" Type="Guid" Nullable="false" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="tbl_lector" Relationship="Self.FK_TBL_LECT_REFERENCE_TBL_LECT" FromRole="tbl_lector_course_link" ToRole="tbl_lector" />
+        </EntityType>
+        <EntityType Name="tbl_trainee">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="ref_training_id" Type="Guid" Nullable="false" />
+          <Property Name="workid" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="name" Type="String" MaxLength="40" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="department" Type="String" MaxLength="80" FixedLength="false" Unicode="true" />
+          <Property Name="organizer" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="signinTime" Type="DateTime" Precision="3" />
+          <Property Name="memo" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="tbl_training" Relationship="Self.FK_TBL_TRAI_REFERENCE_TBL_TRAI" FromRole="tbl_trainee" ToRole="tbl_training" />
+        </EntityType>
+        <EntityType Name="tbl_training">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="ref_course_id" Type="Guid" Nullable="false" />
+          <Property Name="trainer_organizer" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="organizer" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="venue" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="plan_reach" Type="Int32" />
+          <Property Name="actual_reach" Type="Int32" />
+          <Property Name="total_training_time" Type="Double" />
+          <Property Name="pass" Type="Int32" />
+          <Property Name="plan_start_time" Type="DateTime" Precision="3" />
+          <Property Name="plan_end_time" Type="DateTime" Precision="3" />
+          <Property Name="actual_end_time" Type="DateTime" Precision="3" />
+          <Property Name="end_lector_workid" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="tbl_trainee" Relationship="Self.FK_TBL_TRAI_REFERENCE_TBL_TRAI" FromRole="tbl_training" ToRole="tbl_trainee" />
+        </EntityType>
+        <EntityType Name="tbl_training_lector_link">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="ref_training_id" Type="Guid" Nullable="false" />
+          <Property Name="ref_lector_id" Type="Guid" Nullable="false" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="tbl_lector" Relationship="Self.FK_TBL_TRA_LECT_REFERENCE_TBL_LECT" FromRole="tbl_training_lector_link" ToRole="tbl_lector" />
+        </EntityType>
+        <Association Name="FK_TBL_LECT_REFERENCE_TBL_LECT">
+          <End Role="tbl_lector" Type="Self.tbl_lector" Multiplicity="1" />
+          <End Role="tbl_lector_course_link" Type="Self.tbl_lector_course_link" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_lector">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="tbl_lector_course_link">
+              <PropertyRef Name="ref_lector_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TBL_TRA_LECT_REFERENCE_TBL_LECT">
+          <End Role="tbl_lector" Type="Self.tbl_lector" Multiplicity="1" />
+          <End Role="tbl_training_lector_link" Type="Self.tbl_training_lector_link" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_lector">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="tbl_training_lector_link">
+              <PropertyRef Name="ref_lector_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TBL_TRAI_REFERENCE_TBL_TRAI">
+          <End Role="tbl_training" Type="Self.tbl_training" Multiplicity="1" />
+          <End Role="tbl_trainee" Type="Self.tbl_trainee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_training">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="tbl_trainee">
+              <PropertyRef Name="ref_training_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="TrainingSign_Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="sys_user" EntityType="Self.sys_user" />
+          <EntitySet Name="tbl_course" EntityType="Self.tbl_course" />
+          <EntitySet Name="tbl_delete_trainee_log" EntityType="Self.tbl_delete_trainee_log" />
+          <EntitySet Name="tbl_lector" EntityType="Self.tbl_lector" />
+          <EntitySet Name="tbl_lector_course_link" EntityType="Self.tbl_lector_course_link" />
+          <EntitySet Name="tbl_trainee" EntityType="Self.tbl_trainee" />
+          <EntitySet Name="tbl_training" EntityType="Self.tbl_training" />
+          <EntitySet Name="tbl_training_lector_link" EntityType="Self.tbl_training_lector_link" />
+          <AssociationSet Name="FK_TBL_LECT_REFERENCE_TBL_LECT" Association="Self.FK_TBL_LECT_REFERENCE_TBL_LECT">
+            <End Role="tbl_lector" EntitySet="tbl_lector" />
+            <End Role="tbl_lector_course_link" EntitySet="tbl_lector_course_link" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TBL_TRA_LECT_REFERENCE_TBL_LECT" Association="Self.FK_TBL_TRA_LECT_REFERENCE_TBL_LECT">
+            <End Role="tbl_lector" EntitySet="tbl_lector" />
+            <End Role="tbl_training_lector_link" EntitySet="tbl_training_lector_link" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TBL_TRAI_REFERENCE_TBL_TRAI" Association="Self.FK_TBL_TRAI_REFERENCE_TBL_TRAI">
+            <End Role="tbl_training" EntitySet="tbl_training" />
+            <End Role="tbl_trainee" EntitySet="tbl_trainee" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="TrainingSignModelStoreContainer" CdmEntityContainer="TrainingSign_Entities">
+          <EntitySetMapping Name="sys_user">
+            <EntityTypeMapping TypeName="TrainingSignModel.sys_user">
+              <MappingFragment StoreEntitySet="sys_user">
+                <ScalarProperty Name="ADAccount" ColumnName="ADAccount" />
+                <ScalarProperty Name="FullName" ColumnName="FullName" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="LastLogon" ColumnName="LastLogon" />
+                <ScalarProperty Name="IsValid" ColumnName="IsValid" />
+                <ScalarProperty Name="IsAdmin" ColumnName="IsAdmin" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_course">
+            <EntityTypeMapping TypeName="TrainingSignModel.tbl_course">
+              <MappingFragment StoreEntitySet="tbl_course">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="course_no" ColumnName="course_no" />
+                <ScalarProperty Name="course_context" ColumnName="course_context" />
+                <ScalarProperty Name="course_time" ColumnName="course_time" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_delete_trainee_log">
+            <EntityTypeMapping TypeName="TrainingSignModel.tbl_delete_trainee_log">
+              <MappingFragment StoreEntitySet="tbl_delete_trainee_log">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="ref_training_id" ColumnName="ref_training_id" />
+                <ScalarProperty Name="workid" ColumnName="workid" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="signinTime" ColumnName="signinTime" />
+                <ScalarProperty Name="deleteTime" ColumnName="deleteTime" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_lector">
+            <EntityTypeMapping TypeName="TrainingSignModel.tbl_lector">
+              <MappingFragment StoreEntitySet="tbl_lector">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="lector_workid" ColumnName="lector_workid" />
+                <ScalarProperty Name="lector_en_name" ColumnName="lector_en_name" />
+                <ScalarProperty Name="lector_cn_name" ColumnName="lector_cn_name" />
+                <ScalarProperty Name="memo" ColumnName="memo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_lector_course_link">
+            <EntityTypeMapping TypeName="TrainingSignModel.tbl_lector_course_link">
+              <MappingFragment StoreEntitySet="tbl_lector_course_link">
+                <ScalarProperty Name="ref_lector_id" ColumnName="ref_lector_id" />
+                <ScalarProperty Name="ref_course_id" ColumnName="ref_course_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_trainee">
+            <EntityTypeMapping TypeName="TrainingSignModel.tbl_trainee">
+              <MappingFragment StoreEntitySet="tbl_trainee">
+                <ScalarProperty Name="ref_training_id" ColumnName="ref_training_id" />
+                <ScalarProperty Name="workid" ColumnName="workid" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="department" ColumnName="department" />
+                <ScalarProperty Name="organizer" ColumnName="organizer" />
+                <ScalarProperty Name="signinTime" ColumnName="signinTime" />
+                <ScalarProperty Name="memo" ColumnName="memo" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_training">
+            <EntityTypeMapping TypeName="TrainingSignModel.tbl_training">
+              <MappingFragment StoreEntitySet="tbl_training">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="ref_course_id" ColumnName="ref_course_id" />
+                <ScalarProperty Name="trainer_organizer" ColumnName="trainer_organizer" />
+                <ScalarProperty Name="organizer" ColumnName="organizer" />
+                <ScalarProperty Name="venue" ColumnName="venue" />
+                <ScalarProperty Name="plan_reach" ColumnName="plan_reach" />
+                <ScalarProperty Name="actual_reach" ColumnName="actual_reach" />
+                <ScalarProperty Name="total_training_time" ColumnName="total_training_time" />
+                <ScalarProperty Name="pass" ColumnName="pass" />
+                <ScalarProperty Name="plan_start_time" ColumnName="plan_start_time" />
+                <ScalarProperty Name="plan_end_time" ColumnName="plan_end_time" />
+                <ScalarProperty Name="actual_end_time" ColumnName="actual_end_time" />
+                <ScalarProperty Name="end_lector_workid" ColumnName="end_lector_workid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_training_lector_link">
+            <EntityTypeMapping TypeName="TrainingSignModel.tbl_training_lector_link">
+              <MappingFragment StoreEntitySet="tbl_training_lector_link">
+                <ScalarProperty Name="ref_training_id" ColumnName="ref_training_id" />
+                <ScalarProperty Name="ref_lector_id" ColumnName="ref_lector_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

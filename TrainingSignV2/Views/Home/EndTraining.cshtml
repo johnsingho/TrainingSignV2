@@ -1,0 +1,189 @@
+﻿@model TrainingSignWeb.Models.TEndTrainingModel
+
+@{
+    ViewBag.Title = "EndTraining";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("EndTraining", "Home",
+        FormMethod.Post, new { @id = "form_EndTraining" }))
+{
+<div class="col-lg-11">
+    <header class="panel-heading">
+        <h3>结束培训 Close Training</h3>
+    </header>
+
+    <div class="col-md-8 form-group">
+        <div class="col-md-11">
+            <select id="ddlTraining" class="form-control"
+                    title="请选择一个培训..." required>
+                <option></option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-9 form-group">
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.planReach)
+        </div>
+        <div class="col-md-7 col-md-pull-1">
+            @Html.TextBoxFor(m => m.planReach, null, new Dictionary<string, object>
+                                {
+                                    {"class", "form-control"},
+                                    {"required", "true"}
+                                })
+        </div>
+    </div>
+    <div class="col-md-9 form-group">
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.actualReach)
+        </div>
+        <div class="col-md-7 col-md-pull-1">
+            @Html.TextBoxFor(m => m.actualReach, null, new Dictionary<string, object>
+                                {
+                                    {"class", "form-control"},
+                                    {"required", "true"},
+                                    {"ReadOnly", "true"}
+                                })
+        </div>
+    </div>
+    <div class="col-md-9 form-group">
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.totTrainingTime)
+        </div>
+        <div class="col-md-7 col-md-pull-1">
+            @Html.TextBoxFor(m => m.totTrainingTime, null, new Dictionary<string, object>
+                                {
+                                    {"class", "form-control"},
+                                    {"required", "true"},
+                                    {"ReadOnly", "true"}
+                                })
+        </div>
+    </div>
+    <div class="col-md-9 form-group">
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.pass)
+        </div>
+        <div class="col-md-3 col-md-pull-1">
+            @Html.TextBoxFor(m => m.pass, null, new Dictionary<string, object>
+                                {
+                                    {"class", "form-control"},
+                                    {"required", "true"}
+                                })
+        </div>
+        <div class="col-md-4 col-md-pull-1">
+            <span style="font-weight:800;">备注: 负数代表此课程不需要考核</span>
+        </div>
+    </div>
+    <div class="col-md-9 form-group">
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.endLector)
+        </div>
+        <div class="col-md-7 col-md-pull-1">
+            @Html.TextBoxFor(m => m.endLector, "", new Dictionary<string, object>
+                                {
+                                    {"class", "form-control"},
+                                    {"required", "true"}
+                                })
+        </div>
+    </div>
+
+    <div class="col-md-9 form-group">
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m=> m.curTraining)
+        <input type="submit" class="btn btn-primary" value="确定结束" />
+    </div>
+
+</div>
+}
+
+@section Scripts{
+<script type="text/javascript">
+
+    function Init() {
+        var idFrm = "#form_EndTraining";
+        $(idFrm).validate();
+        $(idFrm).on('submit', function (e) {
+            if (e.isDefaultPrevented()) {
+                //invalid
+                return false;
+            } else {
+                var url = $(this).attr("action");
+                AjaxPostForm(url, idFrm, true, function (resp) {
+                    if (resp.bok) {
+                        reload();
+                    } else {
+                        BootstrapDialog.alert("结束培训失败:<br>" + resp.msg);
+                    }
+                },
+                undefined,
+                function () {
+                    showBusyLoading(true);
+                },
+                function () {
+                    showBusyLoading(false);
+                });
+            }
+            return false;
+        });
+    }
+
+
+    function InitTrainingsList(idCtl) {
+        var url = "@Url.Action("GetUnfinishTrainings", "ComUtil")";
+        AjaxPost(url,
+            "{}",
+            true,
+            function(result) {
+                $(idCtl).select2({
+                    data: result,
+                    placeholder: "请选择一个培训...",
+                    dropdownAutoWidth: true
+                }
+                );
+            });
+
+        $(idCtl).on('select2:select',
+            function(e) {
+                var data = e.params.data;
+                $("#hidCurCourse").val(data.id);
+                RefreshTrainingInfo(data);
+            });
+    }
+
+    function RefreshTrainingInfo(tra) {
+        if (!tra) { return; }
+        var url = "@Url.Action("CalcTrainingInfo", "ComUtil")";
+        var para = { "training_id": tra.id, "need_timelen": true };
+        AjaxPost(url,
+            JSON.stringify(para),
+            false,
+            function(result) {
+                if(!result || !result.bok){
+                    return;
+                }
+                var traInf = result.data;
+                var cnt = traInf.nTrainee;
+                $("#planReach").val(cnt);
+                $("#actualReach").val(cnt);
+                $("#pass").val(cnt);
+                var totTime = traInf.courTimeLen*traInf.nTrainee*1.0 || 0.0;
+                $("#totTrainingTime").val(totTime);
+                $("#curTraining").val(tra.id);
+            },
+            undefined,
+            function () {
+                showBusyLoading(true);
+            },
+            function () {
+                showBusyLoading(false);
+            });
+    }
+
+    $(function () {
+        Init();
+        InitTrainingsList("#ddlTraining");
+        bindEmpIDCtrl(10, "#endLector");
+    });
+
+</script>
+}

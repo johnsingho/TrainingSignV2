@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="KQXTModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Customer">
+          <Key>
+            <PropertyRef Name="CustomerID" />
+          </Key>
+          <Property Name="CustomerID" Type="int" Nullable="false" />
+          <Property Name="CardNo" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="OutID" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="CardSN" Type="int" Nullable="false" />
+          <Property Name="Sex" Type="bit" Nullable="false" />
+          <Property Name="DeptCode" Type="varchar" MaxLength="12" Nullable="false" />
+          <Property Name="Pwd" Type="varchar" MaxLength="32" Nullable="false" />
+          <Property Name="MakeCardDT" Type="datetime" Nullable="false" />
+          <Property Name="MagID" Type="int" Nullable="false" />
+          <Property Name="Status" Type="int" Nullable="false" />
+          <Property Name="IDCardNo" Type="varchar" MaxLength="18" />
+          <Property Name="IfCard" Type="bit" Nullable="false" />
+          <Property Name="IfNeedKQ" Type="bit" Nullable="false" />
+          <Property Name="Ver" Type="int" Nullable="false" />
+          <Property Name="SCardSNR" Type="varchar" MaxLength="8" />
+          <Property Name="DisabledTime" Type="datetime" />
+          <Property Name="SN" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CardType" Type="int" />
+          <Property Name="CardSfId" Type="int" />
+          <Property Name="CustSource" Type="int" />
+          <Property Name="IfPhoto" Type="int" Nullable="false" />
+          <Property Name="CellphoneNo" Type="varchar" MaxLength="20" />
+          <Property Name="PCellPhoneNo" Type="varchar" MaxLength="20" />
+        </EntityType>
+        <EntityContainer Name="KQXTModelStoreContainer">
+          <EntitySet Name="Customer" EntityType="Self.Customer" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="KQXTModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Customer">
+          <Key>
+            <PropertyRef Name="CustomerID" />
+          </Key>
+          <Property Name="CustomerID" Type="Int32" Nullable="false" />
+          <Property Name="CardNo" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="OutID" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CardSN" Type="Int32" Nullable="false" />
+          <Property Name="Sex" Type="Boolean" Nullable="false" />
+          <Property Name="DeptCode" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Pwd" Type="String" MaxLength="32" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="MakeCardDT" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="MagID" Type="Int32" Nullable="false" />
+          <Property Name="Status" Type="Int32" Nullable="false" />
+          <Property Name="IDCardNo" Type="String" MaxLength="18" FixedLength="false" Unicode="false" />
+          <Property Name="IfCard" Type="Boolean" Nullable="false" />
+          <Property Name="IfNeedKQ" Type="Boolean" Nullable="false" />
+          <Property Name="Ver" Type="Int32" Nullable="false" />
+          <Property Name="SCardSNR" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="DisabledTime" Type="DateTime" Precision="3" />
+          <Property Name="SN" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CardType" Type="Int32" />
+          <Property Name="CardSfId" Type="Int32" />
+          <Property Name="CustSource" Type="Int32" />
+          <Property Name="IfPhoto" Type="Int32" Nullable="false" />
+          <Property Name="CellphoneNo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="PCellPhoneNo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityContainer Name="KQXTEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Customer" EntityType="Self.Customer" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="KQXTModelStoreContainer" CdmEntityContainer="KQXTEntities">
+          <EntitySetMapping Name="Customer">
+            <EntityTypeMapping TypeName="KQXTModel.Customer">
+              <MappingFragment StoreEntitySet="Customer">
+                <ScalarProperty Name="CustomerID" ColumnName="CustomerID" />
+                <ScalarProperty Name="CardNo" ColumnName="CardNo" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="OutID" ColumnName="OutID" />
+                <ScalarProperty Name="CardSN" ColumnName="CardSN" />
+                <ScalarProperty Name="Sex" ColumnName="Sex" />
+                <ScalarProperty Name="DeptCode" ColumnName="DeptCode" />
+                <ScalarProperty Name="Pwd" ColumnName="Pwd" />
+                <ScalarProperty Name="MakeCardDT" ColumnName="MakeCardDT" />
+                <ScalarProperty Name="MagID" ColumnName="MagID" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="IDCardNo" ColumnName="IDCardNo" />
+                <ScalarProperty Name="IfCard" ColumnName="IfCard" />
+                <ScalarProperty Name="IfNeedKQ" ColumnName="IfNeedKQ" />
+                <ScalarProperty Name="Ver" ColumnName="Ver" />
+                <ScalarProperty Name="SCardSNR" ColumnName="SCardSNR" />
+                <ScalarProperty Name="DisabledTime" ColumnName="DisabledTime" />
+                <ScalarProperty Name="SN" ColumnName="SN" />
+                <ScalarProperty Name="CardType" ColumnName="CardType" />
+                <ScalarProperty Name="CardSfId" ColumnName="CardSfId" />
+                <ScalarProperty Name="CustSource" ColumnName="CustSource" />
+                <ScalarProperty Name="IfPhoto" ColumnName="IfPhoto" />
+                <ScalarProperty Name="CellphoneNo" ColumnName="CellphoneNo" />
+                <ScalarProperty Name="PCellPhoneNo" ColumnName="PCellPhoneNo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
